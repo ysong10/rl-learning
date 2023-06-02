@@ -14,7 +14,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 import torchvision.transforms as T
 
-env = gym.make('CartPole-v0').unwrapped
+env = gym.make('CartPole-v0', render_mode='rgb_array').unwrapped
 
 # set up matplotlib
 is_ipython = 'inline' in matplotlib.get_backend()
@@ -95,7 +95,8 @@ def get_cart_location(screen_width):
 def get_screen():
     # Returned screen requested by gym is 400x600x3, but is sometimes larger
     # such as 800x1200x3\. Transpose it into torch order (CHW).
-    screen = env.render(mode='rgb_array').transpose((2, 0, 1))
+    # screen = env.render(mode='rgb_array').transpose((2, 0, 1))
+    screen = env.render().transpose((2, 0, 1))
     # Cart is in the lower half, so strip off the top and bottom of the screen
     _, screen_height, screen_width = screen.shape
     screen = screen[:, int(screen_height*0.4):int(screen_height * 0.8)]
@@ -192,7 +193,7 @@ def plot_durations():
         display.clear_output(wait=True)
         display.display(plt.gcf())
 
-        
+
 
 def optimize_model():
     if len(memory) < BATCH_SIZE:
@@ -250,7 +251,8 @@ for i_episode in range(num_episodes):
     for t in count():
         # Select and perform an action
         action = select_action(state)
-        _, reward, done, _ = env.step(action.item())
+        _, reward, done, _, _ = env.step(action.item())
+
         reward = torch.tensor([reward], device=device)
 
         # Observe new state
